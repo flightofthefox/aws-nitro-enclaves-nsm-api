@@ -20,10 +20,11 @@ use serde_bytes::ByteBuf;
 #[derive(Debug)]
 /// Possible error types return from this library.
 pub enum Error {
-    /// An IO error of type `std::io::Error`
-    Io(IoError),
     /// A CBOR de error of type `ciborium::de::Error<std::io::Error>`.
     Cbor(ciborium::de::Error<std::io::Error>),
+
+    /// An IO error of type `std::io::Error`
+    Io(IoError),
 }
 
 /// Result type return nsm-io::Error on failure.
@@ -34,6 +35,17 @@ impl From<IoError> for Error {
         Error::Io(error)
     }
 }
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Cbor(err) => write!(f, "CBOR error: {}", err),
+            Error::Io(err) => write!(f, "IO error: {}", err),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
 
 /// List of error codes that the NSM module can return as part of a Response
 #[repr(C)]
